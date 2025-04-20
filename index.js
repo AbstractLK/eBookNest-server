@@ -9,6 +9,11 @@ server.use((req, res, next) => {
     next()
 })
 
+// Add a route to show a message at the root URL
+server.get('/', (req, res) => {
+    res.send('Welcome to the eBookNest API!');
+});
+
 const router = jsonServer.router('./data/db.json');
 server.use('/api', router);
 server.db = router.db

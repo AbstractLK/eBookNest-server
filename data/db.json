@@ -333,6 +333,12 @@
       "password": "$2a$10$G87pV1vwXQ4G5WZRDF8rPOQrRHEKIZNXM0mrzl65w5GQJlWeyuvnq",
       "name": "fac",
       "id": 5
+    },
+    {
+      "email": "user@gmail.com",
+      "password": "$2a$10$9tHKjHJTgJC.9WC09YJjTe9f3UmbvuvOL8UJZsEQzZyH/04Ty1D8u",
+      "name": "user",
+      "id": 6
     }
   ]
 }

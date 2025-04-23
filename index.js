@@ -1,41 +1,55 @@
+// server.js
 import express from "express";
 import jsonServer from "json-server";
 import auth from "json-server-auth";
-import dotenv from "dotenv";
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 dotenv.config();
-const PORT = process.env.PORT || 8000;
 
+// Get directory path in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Create Express server
 const server = express();
+
+// Custom CORS middleware
 server.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', '*');
-    res.header('Access-Control-Allow-Methods', '*');
-    next();
+    res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Headers', '*')
+    next()
 });
 
-// Important: Apply json-server defaults middleware
-const middlewares = jsonServer.defaults();
-server.use(middlewares);
+// Set up json-server with database
+const router = jsonServer.router(join(__dirname, 'data/db.json'));
 
-// Set up the router with the database
-const router = jsonServer.router('./data/db.json');
+// Make db accessible to json-server-auth
 server.db = router.db;
 
-// Apply auth middleware and router directly to the root path
-server.use(auth);     // Apply auth middleware
-server.use(router);   // Mount router at root
+// Set up json-server defaults
+const middlewares = jsonServer.defaults();
 
-// Add a route to show a message at the root URL
-server.get('/', (req, res) => {
-    res.send('Welcome to the eBookNest API!');
+// Define authorization rules
+const rules = auth.rewriter({
+    products: 444,
+    featured_products: 444,
+    orders: 660,
+    users: 600
 });
 
-// For local development
-if (process.env.ENVIRONMENT !== 'production') {
-    server.listen(PORT, () => {
-        console.log(`JSON Server is running on port ${PORT}`);
-    });
-}
+// Apply rules and auth middleware (must be before router)
+server.use(rules);
+server.use(auth);
 
-// Export for Vercel
-export default server;
+// Apply json-server defaults
+server.use(middlewares);
+
+// Use router directly (no /api prefix)
+server.use(router);
+
+// Start server
+const PORT = process.env.PORT || 8000;
+server.listen(PORT, () => {
+    console.log(`JSON Server is running on port ${PORT}`);
+});
